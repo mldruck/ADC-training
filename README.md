@@ -1,6 +1,6 @@
 # ADC-training
 ## test edit 
-## tes edit 2
+## test edit 2
 
 Sample code from Arctic Data Center Training
 
