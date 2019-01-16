@@ -27,9 +27,10 @@ catch <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.
 head(catch)
 ```
 
-We are going to use the pipe operator %>% in order to:
-* remove the sum and notes columns
-* convert from wide to long format
+We are going to use the pipe operator %>% in order to:  
+
+* remove the sum and notes columns  
+* convert from wide to long format  
 
 ```{r}
 catch_long <- catch %>%
@@ -40,7 +41,79 @@ catch_long <- catch %>%
 head(catch_long)
 ```
 
+Next, we use the pipe to:
+
+* rename the catch column as "catch-thousands"  
+* remove non-numeric characters  
+* add a catch column with full values (not factors of a 1000)  
+
+```{r}
+catch_cleaned <- catch_long %>%
+  rename(catch_thousands = catch) %>%
+  mutate(catch_thousands=ifelse(catch_thousands=="I",1,catch_thousands)) %>%
+  mutate(catch_thousands=as.numeric(catch_thousands)) %>%
+  mutate(catch=catch_thousands*1000)
+head(catch_cleaned)
+```
+
+```{r, eval=F, echo=F}
+#We used to locate any non-numeric values in the dataframe's catch_thousands
+test_catch <- as.integer(catch_cleaned$catch_thousands)
+i <- which(is.na(test_catch)==T)
+
+catch_cleaned[i,]
+```
 
 # Split, apply, combine
 
+Calcuate total catch by region:
+
+```{r}
+catch_total <- catch_cleaned %>%
+  group_by(Region, Year) %>%
+  summarize(catch_region = sum(catch),
+            n_obs=n())
+catch_total
+```
+
+Calcuate the average fish by species:
+
+```{r}
+catch_species <- catch_cleaned %>%
+  group_by(species, Year) %>%
+  summarize(catch_mean = mean(catch), catch_sd = sd(catch), n_obs=n())
+catch_species
+```
+
+Filter for chinook:
+
+```{r}
+catch_chinook <- catch_cleaned %>%
+  filter(species=="Chinook" | species=="Chum") %>%
+  arrange(-Year)
+head(catch_chinook)
+```
+
 # Joins
+
+```{r}
+region_defs <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1",
+                        method = "libcurl"),
+                        stringsAsFactors = FALSE)
+head(region_defs)
+```
+
+```{r}
+region_clean <- region_defs %>%
+  select(code, mgmtArea)
+head(region_clean)
+```
+
+We will join below by specifying the columns to join by:
+
+```{r}
+catch_joined <- left_join(catch_cleaned, region_clean, by=c("Region"="code"))
+head(catch_joined)
+```
+
+
