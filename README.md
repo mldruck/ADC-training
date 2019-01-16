@@ -5,7 +5,7 @@
 Sample code from Arctic Data Center Training
 
 This repository is used as:
-
+Sasha's changes
 * An introduction to git
 * Using git with RStudio
 
