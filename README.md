@@ -9,4 +9,4 @@ Sasha's changes
 * An introduction to git
 * Using git with RStudio
 
-Matt changed this line.
+Sasha changed this line.
