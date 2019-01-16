@@ -23,7 +23,21 @@ Read in data file
 catch <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1",
                   method="libcurl"),
                   stringsAsFactors = FALSE)
+# the libcurl method is related to my operating system and how it reads a url
 head(catch)
+```
+
+We are going to use the pipe operator %>% in order to:
+* remove the sum and notes columns
+* convert from wide to long format
+
+```{r}
+catch_long <- catch %>%
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum) %>%
+  # or select(-All, -notesRegCode)
+  gather(key="species", value="catch", -Region, -Year)
+  # gather transforms the data to a long format (spread would do the opposide)
+head(catch_long)
 ```
 
 
