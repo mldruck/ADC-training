@@ -14,6 +14,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(DT)
+library(leaflet)
 ```
 
 
@@ -82,7 +83,27 @@ p <- ggplot(annual_esc, aes(x = year, y = escapement, color = Species))+
   geom_point()+
   facet_wrap(~SASAP.Region, scales="free", ncol=1)+
   my_theme
-p
-ggsave("region_escapement.png", p, width=6, height=12)
+ggsave("figures/region_escapement.png", p, width=6, height=12)
+```
+
+# Interactive Map
+
+Make a map using leaflet
+
+* find unique locations with lon/lat values
+
+```{r}
+locations <- esc %>%
+  distinct(Location, Latitude, Longitude) %>%
+  drop_na()
+datatable(locations)
+```
+
+Create our interaction map
+
+```{r}
+leaflet(locations) %>%
+  addTiles() %>% # this addes some open sourced backgorund tiles to the map
+  addMarkers(~ Longitude, ~ Latitude, popup = ~ Location)
 ```
 
