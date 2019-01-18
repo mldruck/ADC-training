@@ -1,0 +1,23 @@
+---
+title: "Untitled"
+author: "Matthew Druckenmiller"
+date: "1/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Source our function to convert temps
+
+```{r}
+source("fahr_to_celsius.R")
+```
+
+Use one of the functions:
+
+```{r}
+
+```
+
