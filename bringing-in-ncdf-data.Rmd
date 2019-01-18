@@ -1,0 +1,85 @@
+---
+title: "Untitled"
+author: "Matthew Druckenmiller"
+date: "1/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=F, warning=F}
+library(ncdf4)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+# Read in data from a NCDF file
+
+```{r}
+nc <- nc_open("data/WG2013CTD.nc")
+```
+ 
+Look at the meta-data:
+```{r}
+print(nc)
+```
+
+Create a vector of the variables in the ncdf:
+```{r}
+vars <- attributes(nc$var)$names
+```
+
+Getting the dimensions:
+```{r}
+dims <- attributes(nc$dim)$names
+```
+
+Grab the salinity, time, and depth values
+```{r}
+salinity <- ncvar_get(nc, "sal")
+time <- ncvar_get(nc, "time")
+depth <- ncvar_get(nc, "z")
+```
+
+# Reformat the output
+
+Reformat the time:
+```{r}
+time <- as.POSIXct((time + 719529)*86400, origin = "1970-01-01", tz = "UTC")
+```
+
+Coerce to a dataframe:
+```{r}
+salinity_data <- as.data.frame(salinity)
+```
+
+Assign column names to depth values:
+```{r}
+names(salinity_data) <- as.character(depth)
+```
+
+Reshape the data and add time:
+```{r}
+salinity_data_long <- salinity_data %>%
+  mutate(time = time) %>%
+  gather(key = "depth", value = "salinity", -time) %>%
+  mutate(depth = as.numeric(depth))
+head(salinity_data_long)
+```
+
+# Plots
+```{r}
+ggplot(salinity_data_long, aes(x = time, y = depth, fill = salinity)) +
+    geom_raster()
+```
+
+```{r}
+ggplot(salinity_data_long, mapping = aes(x = salinity, y = depth, color = time, group = time)) +
+    geom_line(size=.2) +
+    scale_y_reverse()
+```
+
+
